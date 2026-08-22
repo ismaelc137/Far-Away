@@ -1,0 +1,22 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a545cfc0117475043a593a98792b4468, type: 3}
+  m_Name: Potato
+  m_EditorClassIdentifier: Assembly-CSharp::PlantsSO
+  plantName: Potato
+  plantPrefabs:
+  - {fileID: 8105328318325187018, guid: 4eeae7b9b30af5947bd4eaa68d43da2a, type: 3}
+  - {fileID: 919132149155446097, guid: b05e850824ba9d54997e7a00181a58f2, type: 3}
+  - {fileID: 919132149155446097, guid: 0d2f4178595ef244d902835f0f4cd442, type: 3}
+  - {fileID: 919132149155446097, guid: ee193c662ce02dc40bfdfaa3ba1e9b32, type: 3}
+  - {fileID: 919132149155446097, guid: 4b0ba1a68e7b2d34bb895cbc62b38011, type: 3}
+  - {fileID: 919132149155446097, guid: d674d0714769b8742ac792656a923932, type: 3}
