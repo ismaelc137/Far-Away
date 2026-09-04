@@ -19,7 +19,16 @@ public class PlayeUI : MonoBehaviour
 
     [SerializeField]
     private string noEnergyMessage = "No energy. Rest in bed.";
+    private float temporaryMessageEndTime;
 
+    public void ShowTemporaryMessage(string message, float duration = 2f)
+    {
+     if (promptText == null)
+         return;
+
+     temporaryMessageEndTime = Time.time + duration;
+     promptText.text = message;
+    }
     private void Update()
     {
         UpdateEnergy();
@@ -30,7 +39,8 @@ public class PlayeUI : MonoBehaviour
     {
         if (promptText == null)
             return;
-
+        if (Time.time < temporaryMessageEndTime)
+        return;
         promptText.text = promptMessage;
     }
 

@@ -14,14 +14,30 @@ public class Bed : Interactable
     private Vector3 originalCameraPosition;
     private Quaternion originalCameraRotation;
     private Player_Look playerLook;
+    private PlayeUI playerUI;
+    [SerializeField] private float sleepEnergyThreshold = 30f;
+    [SerializeField] private string cannotSleepMessage = "I can still do more.";
+
+    public bool CanSleep =>
+    GameManager.Instance != null &&
+    GameManager.Instance.energy <= sleepEnergyThreshold;
+
+    public string CannotSleepMessage => cannotSleepMessage;
 
     private void Start()
     {
         playerLook = FindAnyObjectByType<Player_Look>();
+        playerUI = FindAnyObjectByType<PlayeUI>();
     }
     protected override void Interact()
     {
-        StartCoroutine(SleepRoutine());
+     if (!CanSleep)
+     {
+        playerUI?.ShowTemporaryMessage(cannotSleepMessage);
+        return;
+     }
+
+     StartCoroutine(SleepRoutine());
     }
 
     private IEnumerator SleepRoutine()
@@ -38,7 +54,6 @@ public class Bed : Interactable
 
         float timer = 0f;
         float duration = 1f;
-
 
         while (timer < duration)
         {
@@ -66,7 +81,7 @@ public class Bed : Interactable
 
 
         yield return new WaitForSeconds(2f);
-        GameManager.Instance.suns++;
+        GameManager.Instance.AdvanceDay();
         GameManager.Instance.CheckMissionCompletion();
         MachineManager.Instance.EndDay();
         RepairManager.Instance.NewDay();
@@ -106,5 +121,7 @@ public class Bed : Interactable
         motor.enabled = true;
         controller.enabled = true;
         playerLook.lockLook = false;
+        
+        GameManager.Instance.ProcessSolTasks();
     }
 }

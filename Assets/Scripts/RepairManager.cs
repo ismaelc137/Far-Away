@@ -48,18 +48,17 @@ public class RepairManager : MonoBehaviour
 
     private void UpdateUI()
     {
-        string text = "MISSION CONTROL\n\nREPAIR REQUESTS\n\n";
+    string text = "MISSION CONTROL\n\nREPAIR REQUESTS\n\n";
 
-        foreach (Machine machine in brokenMachines)
-        {
-            if (machine.IsBroken)
-                text += "[ ] ";
-            else
-                text += "[/] ";
+     foreach (Machine machine in brokenMachines)
+     {
+        bool done = machine.AttendedToday;
+        string marker = done ? "[X]" : "[ ]";
+        string line = $"{marker} {machine.Type}";
 
-            text += machine.Type + "\n";
-        }
+        text += done ? $"\n<s>{line}</s>" : $"\n{line}";
+     }
 
-        repairText.text = text;
+      repairText.text = text;
     }
 }

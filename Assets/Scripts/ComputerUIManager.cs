@@ -1,4 +1,7 @@
 using UnityEngine;
+using UnityEngine.Events;
+using UnityEngine.UI;
+using TMPro;
 
 public class ComputerUIManager : MonoBehaviour
 {
@@ -18,6 +21,9 @@ public class ComputerUIManager : MonoBehaviour
     [SerializeField] private Player_Look playerLook;
     [SerializeField] private Hands hands;
     private Computer currentComputer;
+    private Button patchButton;
+    private Button mediumRepairButton;
+    private Button totalRepairButton;
 
     public void SetCurrentComputer(Computer computer)
     {
@@ -27,12 +33,14 @@ public class ComputerUIManager : MonoBehaviour
     private void Awake()
     {
         Instance = this;
+        CreateRepairButtons();
     }
 
     public void Open(ComputerType type)
     {
         rootCanvas.SetActive(true);
         HideAllPanels();
+        SetRepairButtonsVisible(type != ComputerType.Logs);
 
         switch (type)
         {
@@ -82,6 +90,16 @@ public class ComputerUIManager : MonoBehaviour
         labPanel.SetActive(false);
     }
 
+    private void SetRepairButtonsVisible(bool visible)
+    {
+        if (patchButton != null)
+            patchButton.gameObject.SetActive(visible);
+        if (mediumRepairButton != null)
+            mediumRepairButton.gameObject.SetActive(visible);
+        if (totalRepairButton != null)
+            totalRepairButton.gameObject.SetActive(visible);
+    }
+
     public void Close()
     {
         rootCanvas.SetActive(false);
@@ -97,16 +115,92 @@ public class ComputerUIManager : MonoBehaviour
 
     public void RepairCurrentComputer()
     {
-        if (currentComputer == null)
+        RepairCurrentComputer(MachineRepairType.Total);
+    }
+
+    public void PatchCurrentComputer()
+    {
+        RepairCurrentComputer(MachineRepairType.Patch);
+    }
+
+    public void MediumRepairCurrentComputer()
+    {
+        RepairCurrentComputer(MachineRepairType.Medium);
+    }
+
+    public void TotalRepairCurrentComputer()
+    {
+        RepairCurrentComputer(MachineRepairType.Total);
+    }
+
+    private void RepairCurrentComputer(MachineRepairType repairType)
+    {
+        if (currentComputer == null || currentComputer.Type == ComputerType.Logs ||
+            currentComputer.Machine == null || !currentComputer.Machine.IsBroken)
             return;
 
-        if (currentComputer.Type != ComputerType.Logs &&
-            currentComputer.Machine != null &&
-            currentComputer.Machine.IsBroken)
+        bool repaired = repairType switch
         {
-            currentComputer.Machine.RepairMachine();
+            MachineRepairType.Patch => currentComputer.Machine.ApplyPatch(),
+            MachineRepairType.Medium => currentComputer.Machine.ApplyMediumRepair(),
+            _ => currentComputer.Machine.ApplyTotalRepair()
+        };
+
+        if (repaired)
+            currentComputer.StartCloseRoutine();
+    }
+
+    private void CreateRepairButtons()
+    {
+        Button repairTemplate = FindLegacyRepairButton();
+        if (repairTemplate == null)
+        {
+            Debug.LogWarning("Repair button template was not found.");
+            return;
         }
 
-        currentComputer.StartCloseRoutine();
+        patchButton = Instantiate(repairTemplate, repairTemplate.transform.parent);
+        mediumRepairButton = Instantiate(repairTemplate, repairTemplate.transform.parent);
+        totalRepairButton = repairTemplate;
+
+        ConfigureRepairButton(patchButton, "PATCH  |  30%  |  5 ENERGY", new Vector2(-180f, 60f), PatchCurrentComputer);
+        ConfigureRepairButton(mediumRepairButton, "MEDIUM  |  65%  |  15 ENERGY", new Vector2(0f, 60f), MediumRepairCurrentComputer);
+        ConfigureRepairButton(totalRepairButton, "TOTAL  |  100%  |  30 ENERGY", new Vector2(180f, 60f), TotalRepairCurrentComputer);
+    }
+
+    private Button FindLegacyRepairButton()
+    {
+        foreach (Button button in rootCanvas.GetComponentsInChildren<Button>(true))
+        {
+            for (int i = 0; i < button.onClick.GetPersistentEventCount(); i++)
+            {
+                if (button.onClick.GetPersistentMethodName(i) == nameof(RepairCurrentComputer))
+                    return button;
+            }
+        }
+
+        return null;
+    }
+
+    private void ConfigureRepairButton(Button button, string label, Vector2 position, UnityAction action)
+    {
+        button.name = label;
+        button.GetComponent<RectTransform>().anchoredPosition = position;
+        button.onClick.RemoveAllListeners();
+
+        for (int i = 0; i < button.onClick.GetPersistentEventCount(); i++)
+            button.onClick.SetPersistentListenerState(i, UnityEventCallState.Off);
+
+        button.onClick.AddListener(action);
+        TMP_Text text = button.GetComponentInChildren<TMP_Text>(true);
+        if (text != null)
+            text.text = label;
+    }
+
+    private enum MachineRepairType
+    {
+        Patch,
+        Medium,
+        Total
     }
 }

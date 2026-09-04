@@ -53,7 +53,6 @@ public class Player_interact : MonoBehaviour
             if (interactable != null)
             {
                 PlayerUI.UpdateText(interactable.PromptMessage);
-
                 if (!CanInteractWith(interactable))
                 {
                     PlayerUI.ShowNoEnergyMessage();
