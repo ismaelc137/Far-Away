@@ -34,7 +34,7 @@ public class Machine : MonoBehaviour
 
     [Header("Repair")]
     [SerializeField, Min(0f)] private float patchIntegrity = 30f;
-    [SerializeField, Min(0f)] private float patchEnergyCost = 15f;
+    [SerializeField, Min(0f)] private float patchEnergyCost = 20f;
     [SerializeField, Min(0f)] private float mediumIntegrity = 65f;
     [SerializeField, Min(0f)] private float mediumEnergyCost = 30f;
     [SerializeField, Min(0f)] private float totalEnergyCost = 60f;

@@ -82,7 +82,6 @@ public class Bed : Interactable
 
         yield return new WaitForSeconds(2f);
         GameManager.Instance.AdvanceDay();
-        GameManager.Instance.CheckMissionCompletion();
         MachineManager.Instance.EndDay();
         RepairManager.Instance.NewDay();
         GameManager.Instance.energy = GameManager.Instance.maxEnergy;
@@ -123,5 +122,6 @@ public class Bed : Interactable
         playerLook.lockLook = false;
         
         GameManager.Instance.ProcessSolTasks();
+        GameManager.Instance.CheckMissionCompletion();
     }
 }

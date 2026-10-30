@@ -16,6 +16,13 @@ public class RepairManager : MonoBehaviour
         Instance = this;
     }
 
+    private void Start()
+    {
+        // Start with repair work available so the player can spend energy and
+        // reach the first rest/day transition without a softlock.
+        NewDay();
+    }
+
     public void NewDay()
     {
         brokenMachines.Clear();

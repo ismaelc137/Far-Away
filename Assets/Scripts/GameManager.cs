@@ -1,11 +1,13 @@
+using System;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public enum SolTaskType
 {
-    PlantFood
-    // futuras tareas van aquí
+    PlantFood,
+    Intro
 }
 
 [System.Serializable]
@@ -17,6 +19,7 @@ public class SolTask
     [TextArea] public string reminderMessage;
     [TextArea] public string failMessage;
     [HideInInspector] public bool reminderShown;
+    [HideInInspector] public bool reminderActivated;
     [HideInInspector] public bool resolved;
 }
 
@@ -34,7 +37,7 @@ public class GameManager : MonoBehaviour
     public bool HasEnergy => energy > 0f;
 
     [Header("Mission")]
-    [SerializeField] private int expectedSuns = 10;
+    [SerializeField] private int expectedSuns = 4;
     public int ExpectedSuns => expectedSuns;
 
     public bool MissionCompleted => expectedSuns <= 0;
@@ -42,10 +45,13 @@ public class GameManager : MonoBehaviour
     private TextMeshProUGUI expectedSunsText;
     private bool gameWon;
     public bool IsGameOver { get; private set; }
+    public bool IsMissionWon => gameWon;
 
     [Header("Sol Tasks")]
     [SerializeField] private List<SolTask> solTasks = new();
     [SerializeField] private float postWakeEventDelay = 1.5f;
+
+    public static event Action<SolTaskType> OnSolTaskReminder;
 
     public void ProcessSolTasks()
     {
@@ -54,10 +60,20 @@ public class GameManager : MonoBehaviour
             if (!task.reminderShown && suns >= task.reminderSol)
             {
                 task.reminderShown = true;
-                EventManager.Instance?.QueueEventDelayed(task.reminderMessage, postWakeEventDelay);
+                if (EventManager.Instance != null)
+                {
+                    EventManager.Instance.QueueEventDelayed(
+                        task.reminderMessage,
+                        postWakeEventDelay,
+                        onShown: () => ActivateSolTaskReminder(task.type));
+                }
+                else
+                {
+                    ActivateSolTaskReminder(task.type);
+                }
             }
 
-            if (!task.resolved && suns >= task.deadlineSol)
+            if (!task.resolved && task.reminderActivated && suns >= task.deadlineSol)
             {
                 task.resolved = true;
 
@@ -68,6 +84,22 @@ public class GameManager : MonoBehaviour
                 }
             }
         }
+    }
+
+    public bool HasSolTaskReminder(SolTaskType type)
+    {
+        return solTasks.Exists(task => task.type == type && task.reminderActivated);
+    }
+
+    private void ActivateSolTaskReminder(SolTaskType type)
+    {
+        foreach (SolTask task in solTasks)
+        {
+            if (task.type == type)
+                task.reminderActivated = true;
+        }
+
+        OnSolTaskReminder?.Invoke(type);
     }
 
     private bool IsTaskCompleted(SolTaskType type)
@@ -87,28 +119,19 @@ public class GameManager : MonoBehaviour
 
         IsGameOver = true;
         Debug.LogWarning($"GAME OVER: {reason}");
-
-        OnGameOverConfirmed();
-    }
-
-    private void OnGameOverConfirmed()
-    {
-        // Aquí cargas la escena de derrota, muestras un menú, etc.
-        // SceneManager.LoadScene("GameOverScene");
+        EventManager.Instance?.QueueEvent(
+            $"MISSION FAILED\n\n{reason}\n\nPress CONTINUE to return to the menu.",
+            ReturnToMenu);
     }
 
     public void AdvanceDay()
     {
-        if (IsGameOver) return;
+        if (IsGameOver || gameWon) return;
 
         suns++;
         expectedSuns = Mathf.Max(0, expectedSuns - 1);
         UpdateExpectedSunsText();
 
-        if (expectedSuns == 0)
-        {
-            WinGame();
-        }
     }
 
     public void AdjustExpectedSuns(int amount)
@@ -121,7 +144,7 @@ public class GameManager : MonoBehaviour
 
     public void CheckMissionCompletion()
     {
-        if (MissionCompleted)
+        if (!IsGameOver && MissionCompleted)
         {
             WinGame();
         }
@@ -134,6 +157,15 @@ public class GameManager : MonoBehaviour
 
         gameWon = true;
         Debug.LogWarning("GAME WON: all required Sols survived.");
+        EventManager.Instance?.QueueEvent(
+            "MISSION COMPLETE\n\nYou survived the Titan assignment. This is only the beginning of Far Away.\n\nPress CONTINUE to return to the menu.",
+            ReturnToMenu);
+    }
+
+    private static void ReturnToMenu()
+    {
+        Time.timeScale = 1f;
+        SceneManager.LoadScene("Menu");
     }
 
     public float EnergyPercent

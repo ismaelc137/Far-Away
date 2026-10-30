@@ -9,25 +9,31 @@ public class Player_Look : MonoBehaviour
     public Camera cam;
     private float xrotation = 0f;
 
-    public float xSensitivity = 30f;
-    public float ySensitivity = 30f;
+    public float xSensitivity = 2f;
+    public float ySensitivity = 2f;
 
-    private void Start()
-    {
-        Cursor.lockState = CursorLockMode.Locked;
-        Cursor.visible = false;
-    }
+private void Start()
+{
+    Cursor.lockState = CursorLockMode.Locked;
+    Cursor.visible = false;
+}
+
+public void SetSensitivity(float newSensitivity)
+{
+    xSensitivity = newSensitivity;
+    ySensitivity = newSensitivity;
+}
 
     private void Update()
  {
     if (lockLook)
     return;
-    if (Keyboard.current.escapeKey.wasPressedThisFrame)
+    if (Keyboard.current != null && Keyboard.current.escapeKey.wasPressedThisFrame)
     {
         Cursor.lockState = CursorLockMode.None;
         Cursor.visible = true;
     }
-    if (Mouse.current.leftButton.wasPressedThisFrame &&
+    if (Mouse.current != null && Mouse.current.leftButton.wasPressedThisFrame &&
         Cursor.lockState == CursorLockMode.None)
     {
         Cursor.lockState = CursorLockMode.Locked;
@@ -41,12 +47,14 @@ public class Player_Look : MonoBehaviour
         float mouseY = input.y;
      if (lockLook)
      return;
-        xrotation -= (mouseY * Time.deltaTime) * ySensitivity;
+        // Mouse delta is already measured per frame; scaling by deltaTime makes
+        // the look speed depend on frame rate and nearly unusable at low FPS.
+        xrotation -= mouseY * ySensitivity * 0.05f;
         xrotation = Mathf.Clamp(xrotation, -80f, 80f);
 
         cam.transform.localRotation = Quaternion.Euler(xrotation, 0f, 0f);
 
-        transform.Rotate(Vector3.up * (mouseX * Time.deltaTime) * xSensitivity);
+        transform.Rotate(Vector3.up * (mouseX * xSensitivity * 0.05f));
     }
     public void ResetLook()
     { 

@@ -19,11 +19,13 @@ public class EventManager : MonoBehaviour
     private Queue<PendingEvent> pendingEvents = new();
     private bool showingEvent;
     private Action currentOnConfirm;
+    public bool IsShowingEvent => showingEvent;
 
     private struct PendingEvent
     {
         public string message;
         public Action onConfirm;
+        public Action onShown;
     }
 
     private void Awake()
@@ -40,21 +42,21 @@ public class EventManager : MonoBehaviour
         if (playerMotor == null) playerMotor = FindAnyObjectByType<Player_Motor>();
     }
 
-    public void QueueEvent(string message, Action onConfirm = null)
+    public void QueueEvent(string message, Action onConfirm = null, Action onShown = null)
     {
-        pendingEvents.Enqueue(new PendingEvent { message = message, onConfirm = onConfirm });
+        pendingEvents.Enqueue(new PendingEvent { message = message, onConfirm = onConfirm, onShown = onShown });
         if (!showingEvent) ShowNext();
     }
 
-    public void QueueEventDelayed(string message, float delay, Action onConfirm = null)
+    public void QueueEventDelayed(string message, float delay, Action onConfirm = null, Action onShown = null)
     {
-        StartCoroutine(DelayedQueue(message, delay, onConfirm));
+        StartCoroutine(DelayedQueue(message, delay, onConfirm, onShown));
     }
 
-    private IEnumerator DelayedQueue(string message, float delay, Action onConfirm)
+    private IEnumerator DelayedQueue(string message, float delay, Action onConfirm, Action onShown)
     {
         yield return new WaitForSeconds(delay);
-        QueueEvent(message, onConfirm);
+        QueueEvent(message, onConfirm, onShown);
     }
 
     private void ShowNext()
@@ -76,6 +78,7 @@ public class EventManager : MonoBehaviour
         if (eventPanel != null) eventPanel.SetActive(true);
 
         currentOnConfirm = next.onConfirm;
+        next.onShown?.Invoke();
     }
 
     public void CloseEvent()
@@ -90,8 +93,8 @@ public class EventManager : MonoBehaviour
 
     private void LockPlayerControl()
     {
-        CharacterController controller = playerMotor.GetComponent<CharacterController>();
-        controller.enabled = false;
+        CharacterController controller = playerMotor != null ? playerMotor.GetComponent<CharacterController>() : null;
+        if (controller != null) controller.enabled = false;
         if (playerLook != null) playerLook.lockLook = true;
         if (playerMotor != null) playerMotor.enabled = false;
         Cursor.lockState = CursorLockMode.None;
@@ -100,8 +103,8 @@ public class EventManager : MonoBehaviour
 
     private void ReleasePlayerControl()
     {
-        CharacterController controller = playerMotor.GetComponent<CharacterController>();
-        controller.enabled = true;
+        CharacterController controller = playerMotor != null ? playerMotor.GetComponent<CharacterController>() : null;
+        if (controller != null) controller.enabled = true;
         if (playerLook != null) playerLook.lockLook = false;
         if (playerMotor != null) playerMotor.enabled = true;
 

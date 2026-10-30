@@ -163,9 +163,9 @@ public class ComputerUIManager : MonoBehaviour
         mediumRepairButton = Instantiate(repairTemplate, repairTemplate.transform.parent);
         totalRepairButton = repairTemplate;
 
-        ConfigureRepairButton(patchButton, "PATCH  |  30%  |  5 ENERGY", new Vector2(-180f, 60f), PatchCurrentComputer);
-        ConfigureRepairButton(mediumRepairButton, "MEDIUM  |  65%  |  15 ENERGY", new Vector2(0f, 60f), MediumRepairCurrentComputer);
-        ConfigureRepairButton(totalRepairButton, "TOTAL  |  100%  |  30 ENERGY", new Vector2(180f, 60f), TotalRepairCurrentComputer);
+        ConfigureRepairButton(patchButton, "PATCH  |  30%  |  20 ENERGY", new Vector2(-180f, 60f), PatchCurrentComputer);
+        ConfigureRepairButton(mediumRepairButton, "MEDIUM  |  65%  |  30 ENERGY", new Vector2(0f, 60f), MediumRepairCurrentComputer);
+        ConfigureRepairButton(totalRepairButton, "TOTAL  |  100%  |  60 ENERGY", new Vector2(180f, 60f), TotalRepairCurrentComputer);
     }
 
     private Button FindLegacyRepairButton()
