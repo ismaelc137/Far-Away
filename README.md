@@ -1,4 +1,5 @@
 # Far Away
+![](Titan_DevloG.png)
 
 An early first-person psychological horror prototype about surviving alone inside a failing research base on Titan.
 
@@ -38,6 +39,7 @@ An early first-person psychological horror prototype about surviving alone insid
 A team of researchers travels to Titan to help terraform the moon. When a storm forces the rest of the crew to evacuate, the protagonist is left alone inside the base. Toxic gas outside makes escape impossible. After sending a distress signal, they must keep the station running and survive until a rescue team arrives, while using mission logs to keep people on Earth invested in bringing them home. The organizations deciding whether to send help may be willing to abandon one stranded researcher.
 
 The intended tone is psychological horror: isolation, mounting anxiety, and the feeling that the base is slowly coming apart. This prototype only offers an early glimpse of that experience.
+![](Far_Away_upd4.png)
 
 ## Run the project in Unity
 
